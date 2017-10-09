@@ -15,6 +15,7 @@ def calcNormal(points):
     n = np.divide(x, np.linalg.norm(x))
     return n
 
+
 def calcAxes(points):
     """Calculate a local coordinate frame for an object given points in a plane         of that object."""
     y = calcNormal(points)
@@ -30,6 +31,26 @@ def calcAxes(points):
     z = np.cross(x,y)
     return (x, y, z)
 
+
+def calcXAxis(lipids, helixResidues):
+    """Calculate a faux-X-axis; that is, a vector pointing from the 
+    center of mass of the lipids to the center of mass of a single 
+    helical turn in the MSP."""
+    lipidR = calcCenterOfMass(lipids)
+    helixR = calcCenterOfMass(helixResidues)
+    x = (helixR - lipidR) 
+    return x / np.linalg.norm(x)
+    
+def calcCenterOfMass(atoms):
+    """Calculate the center of mass of a given set of atoms."""
+    M = 0.0
+    s = np.zeros((3)) 
+    for a in atoms:
+        s += a.mass * a.position 
+        M += a.mass
+    s /= M
+    return s
+ 
 xGlobal = np.array((1,0,0))
 yGlobal = np.array((0,1,0))
 zGlobal = np.array((0,0,1))
@@ -58,35 +79,32 @@ plt.show()
 
 # test reading
 u = mda.Universe('ND.psf','ND.dcd')
-selection_str = 'resname DLPE DMPC DPPC GPG LPPC PALM PC PGCL POPC POPE'
-lipids = u.select_atoms(selection_str, updating=True)
+lipid_str = 'resname DLPE DMPC DPPC GPG LPPC PALM PC PGCL POPC POPE'
+helix_str = 'resnum 144:147'
+lipids = u.select_atoms(lipid_str, updating=True)
+helixResidues = u.select_atoms(helix_str, updating=True)
 dt = 10e-12
 xs = np.zeros(len(u.trajectory))
 xangles = np.zeros(len(u.trajectory))
 yangles = np.zeros(len(u.trajectory))
-zangles = np.zeros(len(u.trajectory))
 for i,ts in enumerate(u.trajectory):
-    x,y,z = calcAxes(lipids.positions)
+    y = calcNormal(lipids.positions)
+    x = calcXAxis(lipids, helixResidues)
     xangles[i] = np.arccos(np.vdot(x, xGlobal))
     yangles[i] = np.arccos(np.vdot(y, yGlobal))
-    zangles[i] = np.arccos(np.vdot(z, zGlobal))
     xs[i] = dt * i 
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(xs, xangles, color='red')
 ax.plot(xs, yangles, color='green')
-ax.plot(xs, zangles, color='blue')
 plt.show()   
 
 xRotDisp = np.sum(np.absolute(np.diff(xangles)))
 yRotDisp = np.sum(np.absolute(np.diff(yangles)))
-zRotDisp = np.sum(np.absolute(np.diff(zangles)))
 delT = dt * len(u.trajectory)
 delTdelX = np.divide(delT, xRotDisp)
 delTdelY = np.divide(delT, yRotDisp)
-delTdelZ = np.divide(delT, zRotDisp)
 print('Rotational correlation times (x,y,z): {} {} {}'.format(delTdelX,
-                                                              delTdelY,
-                                                              delTdelZ))
+                                                              delTdelY))
 
