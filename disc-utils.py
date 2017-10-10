@@ -80,31 +80,53 @@ plt.show()
 # test reading
 u = mda.Universe('ND.psf','ND.dcd')
 lipid_str = 'resname DLPE DMPC DPPC GPG LPPC PALM PC PGCL POPC POPE'
-helix_str = 'resnum 144:147'
+helix_str = 'bynum 1352:1389' # a single turn of MSP1, near x-axis at start
 lipids = u.select_atoms(lipid_str, updating=True)
 helixResidues = u.select_atoms(helix_str, updating=True)
 dt = 10e-12
 xs = np.zeros(len(u.trajectory))
-xangles = np.zeros(len(u.trajectory))
-yangles = np.zeros(len(u.trajectory))
+pitch = np.zeros(len(u.trajectory))
+yaw = np.zeros(len(u.trajectory))
+roll = np.zeros(len(u.trajectory))
 for i,ts in enumerate(u.trajectory):
-    y = calcNormal(lipids.positions)
+    # Get local coordinate axes 
+    z = calcNormal(lipids.positions)
     x = calcXAxis(lipids, helixResidues)
-    xangles[i] = np.arccos(np.vdot(x, xGlobal))
-    yangles[i] = np.arccos(np.vdot(y, yGlobal))
+    y = np.cross(z, x)
+    
+    # Compute the yaw, i.e. rotation of x-axis about the global y-axis
+    xhat = np.copy(x)
+    xhat[1] = 0.0 # project onto xz-plane
+    xhat /= np.linalg.norm(xhat)
+    yaw[i] = np.arccos(np.vdot(xhat, xGlobal)) # a dot b = |a||b|cos(theta)
+   
+    # Compute the pitch, i.e. rotation of z-axis about the global x-axis 
+    zhat = np.copy(z)
+    zhat[0] = 0.0 # project onto zy-plane
+    zhat /= np.linalg.norm(zhat)
+    pitch[i] = np.arccos(np.vdot(zhat, zGlobal))
+    
+    # Compute the roll, i.e. rotation of y-axis about the global z-axis
+    yhat = np.copy(y)
+    yhat[2] = 0.0 # project onto xy-plane
+    yhat /= np.linalg.norm(yhat)
+    roll[i] = np.arccos(np.vdot(yhat, yGlobal))
+   
+    # X points for graphing 
     xs[i] = dt * i 
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.plot(xs, xangles, color='red')
-ax.plot(xs, yangles, color='green')
+ax.plot(xs, roll, color='red', label='Roll Angle')
+ax.plot(xs, pitch, color='green', label='Pitch Angle')
+ax.plot(xs, yaw, color='yellow', label='Yaw Angle')
 plt.show()   
 
+"""
 xRotDisp = np.sum(np.absolute(np.diff(xangles)))
 yRotDisp = np.sum(np.absolute(np.diff(yangles)))
 delT = dt * len(u.trajectory)
 delTdelX = np.divide(delT, xRotDisp)
 delTdelY = np.divide(delT, yRotDisp)
-print('Rotational correlation times (x,y,z): {} {} {}'.format(delTdelX,
-                                                              delTdelY))
+"""
 
