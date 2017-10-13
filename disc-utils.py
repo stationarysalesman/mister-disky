@@ -83,7 +83,7 @@ lipid_str = 'resname DLPE DMPC DPPC GPG LPPC PALM PC PGCL POPC POPE'
 helix_str = 'bynum 1352:1389' # a single turn of MSP1, near x-axis at start
 lipids = u.select_atoms(lipid_str, updating=True)
 helixResidues = u.select_atoms(helix_str, updating=True)
-dt = 10e-12
+dt = 1e-9
 xs = np.zeros(len(u.trajectory))
 pitch = np.zeros(len(u.trajectory))
 yaw = np.zeros(len(u.trajectory))
@@ -119,14 +119,16 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(xs, roll, color='red', label='Roll Angle')
 ax.plot(xs, pitch, color='green', label='Pitch Angle')
-ax.plot(xs, yaw, color='yellow', label='Yaw Angle')
+ax.plot(xs, yaw, color='blue', label='Yaw Angle')
 plt.show()   
 
-"""
-xRotDisp = np.sum(np.absolute(np.diff(xangles)))
-yRotDisp = np.sum(np.absolute(np.diff(yangles)))
+rollRotDisp = np.sum(np.absolute(np.diff(roll)))
+pitchRotDisp = np.sum(np.absolute(np.diff(pitch)))
+yawRotDisp = np.sum(np.absolute(np.diff(yaw)))
 delT = dt * len(u.trajectory)
-delTdelX = np.divide(delT, xRotDisp)
-delTdelY = np.divide(delT, yRotDisp)
-"""
-
+delTdelRoll = np.divide(delT, rollRotDisp)
+delTdelPitch = np.divide(delT, pitchRotDisp)
+delTdelYaw = np.divide(delT, yawRotDisp)
+print('Roll rotational correlation time: {}'.format(delTdelRoll))
+print('Pitch rotational correlation time: {}'.format(delTdelPitch))
+print('Yaw rotational correlation time: {}'.format(delTdelYaw))
