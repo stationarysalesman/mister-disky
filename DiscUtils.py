@@ -3,6 +3,26 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import MDAnalysis as mda
 
+# Globals / constants
+xGlobal = np.array((1,0,0))
+yGlobal = np.array((0,1,0))
+zGlobal = np.array((0,0,1))
+
+def autocorrelation(v):
+    """Compute the autocorrelation of a function, given by the 
+    discrete values in vector v."""
+    r_hat = np.zeros(v.size)
+    mu = v.mean()
+    sigma_sq = v.var()
+    n = v.size
+    for k in range(n):
+        factor = 1 / ((n-k)*sigma_sq)
+        s = 0.0
+        for t in range(0, n-k):
+            s += ((v[t] - mu) * (v[t+k] - mu))
+        r_hat[k] = factor * s
+    return r_hat
+
 def calcNormal(points):
     """Use least-squares regression to get a plane from a set of points. 
         Return the normal of that plane."""
@@ -51,10 +71,6 @@ def calcCenterOfMass(atoms):
     s /= M
     return s
  
-xGlobal = np.array((1,0,0))
-yGlobal = np.array((0,1,0))
-zGlobal = np.array((0,0,1))
-
 def calcRotation(x,y,z):
     """Calculate the angle between a local coordinate frame, defined by x,y,z, 
         and a global coordinate frame defined by x=(1,0,0), y=(0,1,0), and 
@@ -62,18 +78,4 @@ def calcRotation(x,y,z):
     thetaX = np.arccos(np.vdot(x, xGlobal))
     thetaY = np.arccos(np.vdot(y, yGlobal))
     thetaZ = np.arccos(np.vdot(z, zGlobal))
-
-# test
-"""
-points = np.array(((1,0,0),(0,1,0),(0,0,0)))
-x,y,z = calcAxes(points)
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-xs,ys,zs = np.hsplit(points,[1,2])
-ax.scatter(xs,ys,zs)
-ax.plot([0,x[0]],[0,x[1]],[0,x[2]])
-ax.plot([0,y[0]],[0,y[1]],[0,y[2]], color='red')
-ax.plot([0,z[0]],[0,z[1]],[0,z[2]], color='green')
-plt.show()
-"""
 

@@ -68,6 +68,11 @@ def main():
     print('Pitch rotational correlation time: {}'.format(delTdelPitch))
     print('Yaw rotational correlation time: {}'.format(delTdelYaw))
 
+    # Autocorrelation function
+    rhat_roll = DiscUtils.autocorrelation(roll)
+    rhat_pitch = DiscUtils.autocorrelation(pitch)
+    rhat_yaw = DiscUtils.autocorrelation(yaw)
+
 if __name__ == '__main__':
     main()
 
