@@ -24,9 +24,6 @@ def main():
         y2_pos = y2[0].position
         y = (y1_pos - y2_pos) / (np.linalg.norm(y1_pos - y2_pos))
         z = np.cross(x, y)
-        print('x: {}'.format(x)) 
-        print('y: {}'.format(y)) 
-        print('z: {}'.format(z)) 
         # Compute the yaw, i.e. rotation of x-axis about the global y-axis
         xhat = np.copy(x)
         xhat[1] = 0.0 # project onto xz-plane
@@ -55,11 +52,15 @@ def main():
     ax.plot(xs, yaw, color='blue', label='Yaw Angle')
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles, labels)
-    plt.show()   
+    plt.show()
 
-    rollRotDisp = np.sum(np.absolute(np.diff(roll)))
-    pitchRotDisp = np.sum(np.absolute(np.diff(pitch)))
-    yawRotDisp = np.sum(np.absolute(np.diff(yaw)))
+    rolldelThetas = np.absolute(np.diff(roll))
+    pitchdelThetas = np.absolute(np.diff(pitch))
+    yawdelThetas = np.absolute(np.diff(yaw))
+    
+    rollRotDisp = np.sum(rolldelThetas)
+    pitchRotDisp = np.sum(pitchdelThetas)
+    yawRotDisp = np.sum(yawdelThetas)
     delT = dt * len(u.trajectory)
     delTdelRoll = np.divide(delT, rollRotDisp)
     delTdelPitch = np.divide(delT, pitchRotDisp)
@@ -69,9 +70,20 @@ def main():
     print('Yaw rotational correlation time: {}'.format(delTdelYaw))
 
     # Autocorrelation function
-    rhat_roll = DiscUtils.autocorrelation(roll)
-    rhat_pitch = DiscUtils.autocorrelation(pitch)
-    rhat_yaw = DiscUtils.autocorrelation(yaw)
+    rhat_roll = autocorrelation(rolldelThetas)
+    rhat_pitch = autocorrelation(pitchdelThetas)
+    rhat_yaw = autocorrelation(yawdelThetas)
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot(111)
+    ax2.plot(xs[1:], rhat_roll, color='red', label='Roll Autocorrelation')
+    ax2.plot(xs[1:], rhat_pitch, color='green', label='Pitch Autocorrelation')
+    ax2.plot(xs[1:], rhat_yaw, color='blue', label='Yaw Autocorrelation')
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(handles2, labels2)
+
+    # Show the plot
+    plt.show()   
+
 
 if __name__ == '__main__':
     main()
