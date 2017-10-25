@@ -1,7 +1,12 @@
 from DiscUtils import *
 
+# Trajectory paths
+dcdPath = '../ND_trajectory/ND_100ps.dcd'
+psfPath = 'ND.psf'
+dt = 100e-12
+
 def main():
-    u = mda.Universe('ND.psf','ND.dcd')
+    u = mda.Universe(psfPath, dcdPath)
     lipid_str = 'resname DLPE DMPC DPPC GPG LPPC PALM PC PGCL POPC POPE'
     helix_str = 'bynum 1352:1389' # a single turn of MSP1, near x-axis at start
     #lipids = u.select_atoms(lipid_str, updating=True)
@@ -10,7 +15,6 @@ def main():
     x2 = u.select_atoms('bynum 2791', updating=True)
     y1 = u.select_atoms('bynum 3211', updating=True)
     y2 = u.select_atoms('bynum 2247', updating=True)
-    dt = 1e-9
     xs = np.zeros(len(u.trajectory))
     pitch = np.zeros(len(u.trajectory))
     yaw = np.zeros(len(u.trajectory))
@@ -70,6 +74,7 @@ def main():
     print('Yaw rotational correlation time: {}'.format(delTdelYaw))
 
     # Autocorrelation function
+     
     rhat_roll = autocorrelation(rolldelThetas)
     rhat_pitch = autocorrelation(pitchdelThetas)
     rhat_yaw = autocorrelation(yawdelThetas)
@@ -80,7 +85,8 @@ def main():
     ax2.plot(xs[1:], rhat_yaw, color='blue', label='Yaw Autocorrelation')
     handles2, labels2 = ax2.get_legend_handles_labels()
     ax2.legend(handles2, labels2)
-
+    
+    
     # Show the plot
     plt.show()   
 
