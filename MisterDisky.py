@@ -49,18 +49,23 @@ def main():
         # X points for graphing 
         xs[i] = dt * i 
 
+    # Smooth by only taking every 100th point
+    xs_smooth = xs[::200]
+    roll_smooth = roll[::200]
+    pitch_smooth = pitch[::200]
+    yaw_smooth = yaw[::200]
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(xs, roll, color='red', label='Roll Angle')
-    ax.plot(xs, pitch, color='green', label='Pitch Angle')
-    ax.plot(xs, yaw, color='blue', label='Yaw Angle')
+    ax.plot(xs_smooth, roll_smooth, color='red', label='Roll Angle')
+    ax.plot(xs_smooth, pitch_smooth, color='green', label='Pitch Angle')
+    ax.plot(xs_smooth, yaw_smooth, color='blue', label='Yaw Angle')
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles, labels)
     plt.show()
 
-    rolldelThetas = np.absolute(np.diff(roll))
-    pitchdelThetas = np.absolute(np.diff(pitch))
-    yawdelThetas = np.absolute(np.diff(yaw))
+    rolldelThetas = np.absolute(np.diff(roll_smooth))
+    pitchdelThetas = np.absolute(np.diff(pitch_smooth))
+    yawdelThetas = np.absolute(np.diff(yaw_smooth))
     
     rollRotDisp = np.sum(rolldelThetas)
     pitchRotDisp = np.sum(pitchdelThetas)
@@ -74,7 +79,7 @@ def main():
     print('Yaw rotational correlation time: {}'.format(delTdelYaw))
 
     # Autocorrelation function
-     
+    """     
     rhat_roll = autocorrelation(rolldelThetas)
     rhat_pitch = autocorrelation(pitchdelThetas)
     rhat_yaw = autocorrelation(yawdelThetas)
@@ -89,7 +94,7 @@ def main():
     
     # Show the plot
     plt.show()   
-
+    """
 
 if __name__ == '__main__':
     main()
