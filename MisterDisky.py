@@ -17,10 +17,10 @@ def main():
     xs = np.zeros(len(u.trajectory))
     """
     # coarse grain atoms 
-    x1 = u.select_atoms('bynum 1771', updating=True)
-    x2 = u.select_atoms('bynum 2791', updating=True)
-    y1 = u.select_atoms('bynum 3211', updating=True)
-    y2 = u.select_atoms('bynum 2247', updating=True)
+    x1 = u.select_atoms('bynum 21', updating=True)
+    x2 = u.select_atoms('bynum 232', updating=True)
+    y1 = u.select_atoms('bynum 117', updating=True)
+    y2 = u.select_atoms('bynum 347', updating=True)
 
     xs = np.zeros(len(u.trajectory))
     pitch = np.zeros(len(u.trajectory))
@@ -58,7 +58,7 @@ def main():
         xs[i] = dt * i / (1e-9) 
 
     # Smooth by only taking every nth point
-    n = 200
+    n = 1 
     """ 
     xs_smooth = [np.sum(xs[i:i+n])/n for i in range(len(xs)-n)]
     roll_smooth = [np.sum(roll[i:i+n])/n for i in range(len(xs)-n)]
@@ -69,7 +69,7 @@ def main():
     roll_smooth = roll[::n]
     pitch_smooth = pitch[::n]
     yaw_smooth = yaw[::n]
-    print('num points: {}'.format(len(xs))) 
+    print('num points: {}'.format(len(xs_smooth))) 
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(xs_smooth, roll_smooth, color='red', label='Roll Angle')
