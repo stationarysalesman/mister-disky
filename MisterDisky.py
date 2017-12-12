@@ -1,20 +1,27 @@
 from DiscUtils import *
 
 # Trajectory paths
-dcdPath = '../ND_trajectory/ND_100ps.dcd'
-psfPath = 'ND.psf'
-dt = 100e-12
+dcdPath = '../dec-cg/ND_combined_10.dcd'
+psfPath = '../dec-cg/ND.psf'
+dt = 20e-15
 
 def main():
     u = mda.Universe(psfPath, dcdPath)
-    lipid_str = 'resname DLPE DMPC DPPC GPG LPPC PALM PC PGCL POPC POPE'
-    helix_str = 'bynum 1352:1389' # a single turn of MSP1, near x-axis at start
-    #lipids = u.select_atoms(lipid_str, updating=True)
-    #helixResidues = u.select_atoms(helix_str, updating=True)
+
+    # hybrid atoms
+    """ 
     x1 = u.select_atoms('bynum 1771', updating=True)
     x2 = u.select_atoms('bynum 2791', updating=True)
     y1 = u.select_atoms('bynum 3211', updating=True)
     y2 = u.select_atoms('bynum 2247', updating=True)
+    xs = np.zeros(len(u.trajectory))
+    """
+    # coarse grain atoms 
+    x1 = u.select_atoms('bynum 1771', updating=True)
+    x2 = u.select_atoms('bynum 2791', updating=True)
+    y1 = u.select_atoms('bynum 3211', updating=True)
+    y2 = u.select_atoms('bynum 2247', updating=True)
+
     xs = np.zeros(len(u.trajectory))
     pitch = np.zeros(len(u.trajectory))
     yaw = np.zeros(len(u.trajectory))
@@ -47,13 +54,22 @@ def main():
         roll[i] = np.arccos(np.vdot(yhat, yGlobal))
        
         # X points for graphing 
-        xs[i] = dt * i 
+        #xs[i] = dt * i 
+        xs[i] = dt * i / (1e-9) 
 
-    # Smooth by only taking every 100th point
-    xs_smooth = xs[::200]
-    roll_smooth = roll[::200]
-    pitch_smooth = pitch[::200]
-    yaw_smooth = yaw[::200]
+    # Smooth by only taking every nth point
+    n = 200
+    """ 
+    xs_smooth = [np.sum(xs[i:i+n])/n for i in range(len(xs)-n)]
+    roll_smooth = [np.sum(roll[i:i+n])/n for i in range(len(xs)-n)]
+    pitch_smooth = [np.sum(pitch[i:i+n])/n for i in range(len(xs)-n)]
+    yaw_smooth = [np.sum(yaw[i:i+n])/n for i in range(len(xs)-n)]
+    """ 
+    xs_smooth = xs[::n]
+    roll_smooth = roll[::n]
+    pitch_smooth = pitch[::n]
+    yaw_smooth = yaw[::n]
+    print('num points: {}'.format(len(xs))) 
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(xs_smooth, roll_smooth, color='red', label='Roll Angle')
@@ -66,7 +82,16 @@ def main():
     rolldelThetas = np.absolute(np.diff(roll_smooth))
     pitchdelThetas = np.absolute(np.diff(pitch_smooth))
     yawdelThetas = np.absolute(np.diff(yaw_smooth))
-    
+   
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot(111)
+    ax2.plot(xs_smooth[1:], rolldelThetas, color='red', label='Roll $\Delta \\theta$')
+    ax2.plot(xs_smooth[1:], pitchdelThetas, color='green', label='Pitch $\Delta \\theta$')
+    ax2.plot(xs_smooth[1:], yawdelThetas, color='blue', label='Yaw $\Delta \\theta$')
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(handles2, labels2) 
+    plt.show()
+
     rollRotDisp = np.sum(rolldelThetas)
     pitchRotDisp = np.sum(pitchdelThetas)
     yawRotDisp = np.sum(yawdelThetas)
@@ -79,22 +104,21 @@ def main():
     print('Yaw rotational correlation time: {}'.format(delTdelYaw))
 
     # Autocorrelation function
-    """     
     rhat_roll = autocorrelation(rolldelThetas)
     rhat_pitch = autocorrelation(pitchdelThetas)
     rhat_yaw = autocorrelation(yawdelThetas)
-    fig2 = plt.figure()
-    ax2 = fig2.add_subplot(111)
-    ax2.plot(xs[1:], rhat_roll, color='red', label='Roll Autocorrelation')
-    ax2.plot(xs[1:], rhat_pitch, color='green', label='Pitch Autocorrelation')
-    ax2.plot(xs[1:], rhat_yaw, color='blue', label='Yaw Autocorrelation')
-    handles2, labels2 = ax2.get_legend_handles_labels()
-    ax2.legend(handles2, labels2)
+    fig3 = plt.figure()
+    ax3 = fig3.add_subplot(111)
+    ax3.plot(xs_smooth[1:], rhat_roll, color='red', label='Roll Autocorrelation')
+    ax3.plot(xs_smooth[1:], rhat_pitch, color='green', label='Pitch Autocorrelation')
+    ax3.plot(xs_smooth[1:], rhat_yaw, color='blue', label='Yaw Autocorrelation')
+    handles3, labels3 = ax3.get_legend_handles_labels()
+    ax3.legend(handles3, labels3)
     
     
     # Show the plot
     plt.show()   
-    """
+
 
 if __name__ == '__main__':
     main()
