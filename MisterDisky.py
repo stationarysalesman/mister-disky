@@ -3,7 +3,7 @@ from DiscUtils import *
 # Trajectory paths
 dcdPath = '../dec-cg/ND_combined_10.dcd'
 psfPath = '../dec-cg/ND.psf'
-dt = 20e-15
+dt = 20e-15 * 1000 * 10
 
 def main():
     u = mda.Universe(psfPath, dcdPath)
@@ -58,7 +58,7 @@ def main():
         xs[i] = dt * i / (1e-9) 
 
     # Smooth by only taking every nth point
-    n = 1 
+    n = 100 
     """ 
     xs_smooth = [np.sum(xs[i:i+n])/n for i in range(len(xs)-n)]
     roll_smooth = [np.sum(roll[i:i+n])/n for i in range(len(xs)-n)]
