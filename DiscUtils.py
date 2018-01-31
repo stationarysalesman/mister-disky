@@ -11,10 +11,10 @@ zGlobal = np.array((0,0,1))
 def autocorrelation(v):
     """Compute the autocorrelation of a function, given by the 
     discrete values in vector v."""
-    r_hat = np.zeros(v.size)
+    r_hat = np.zeros(v.size).reshape(v.shape)
     mu = v.mean()
     sigma_sq = v.var()
-    n = v.size
+    n = len(v)
     for k in range(n):
         factor = 1 / ((n-k)*sigma_sq)
         s = 0.0
