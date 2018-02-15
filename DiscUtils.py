@@ -8,20 +8,20 @@ xGlobal = np.array((1,0,0))
 yGlobal = np.array((0,1,0))
 zGlobal = np.array((0,0,1))
 
+
 def autocorrelation(v):
     """Compute the autocorrelation of a function, given by the 
     discrete values in vector v."""
-    r_hat = np.zeros(v.size).reshape(v.shape)
-    mu = v.mean()
-    sigma_sq = v.var()
-    n = len(v)
-    for k in range(n):
-        factor = 1 / ((n-k)*sigma_sq)
+    nvals = len(v) 
+    autocorr = list() 
+    for deltaT in range(4000):
         s = 0.0
-        for t in range(0, n-k):
-            s += ((v[t] - mu) * (v[t+k] - mu))
-        r_hat[k] = factor * s
-    return r_hat
+        for i in range(nvals-deltaT):
+            s += np.vdot(v[i], v[i+deltaT])
+        s /= (nvals-deltaT) 
+        autocorr.append(s)
+    return autocorr
+
 
 def calcNormal(points):
     """Use least-squares regression to get a plane from a set of points. 

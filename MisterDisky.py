@@ -60,8 +60,6 @@ def main():
     print('x angles: {}'.format(x_axis_angles))
     print('y angles: {}'.format(y_axis_angles))
     print('z angles: {}'.format(z_axis_angles))
-
-
     # Smooth by only taking every nth point
     n = 1 
     xs_smooth = xs[::n]
@@ -69,10 +67,14 @@ def main():
     y_angles_smooth = y_axis_angles[::n]
     z_angles_smooth = z_axis_angles[::n]
     print('num points: {}'.format(len(xs_smooth))) 
-    
+    f = open('thetaversustime.csv', 'w')
+    f.write('time,theta\n')
+    for i,theta in enumerate(z_angles_smooth):
+        f.write('{},{}\n'.format(i*dt*n,theta))
+    f.close()
+
+      
     # Autocorrelation function
-    x_autocorr = autocorrelation(x_angles_smooth)
-    y_autocorr = autocorrelation(y_angles_smooth)
     z_autocorr = autocorrelation(z_angles_smooth)
     
     # Fit autocorrelation to exponential decays
@@ -90,8 +92,6 @@ def main():
     xs_graph = xs_smooth
     fig3 = plt.figure()
     ax3 = fig3.add_subplot(111)
-    ax3.plot(xs_graph, x_autocorr, color='red', label='X Autocorrelation')
-    ax3.plot(xs_graph, y_autocorr, color='green', label='Y Autocorrelation')
     ax3.plot(xs_graph, z_autocorr, color='blue', label='Z Autocorrelation')
     handles3, labels3 = ax3.get_legend_handles_labels()
     ax3.legend(handles3, labels3)
@@ -99,7 +99,7 @@ def main():
     
     # Show the plot
     plt.show()   
-
+    
 
 if __name__ == '__main__':
     main()
