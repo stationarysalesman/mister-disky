@@ -72,8 +72,10 @@ def main():
     alpha2 = 3 * sin2theta * cos2theta
     alpha3 = (3/4.) * sin4theta
     initpos = u_positions[0]
+
+    mod_positions = u_positions[:6000]
     for t in range(1,n):
-        v[t] = P_2(u_positions,t) 
+        v[t] = P_2(mod_positions,t) 
 
     
     # Fit to sum of exponentials
